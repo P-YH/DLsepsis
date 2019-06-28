@@ -29,16 +29,48 @@ function [score, label] = get_sepsis_score(data, model)
     end
     %}
     
-    
-    %
     imageSize = [80 80 3];
+    %{
+    
+    if num_rows<10
+        imageSize = [224 224 3];
+    else
+        imageSize = [80 80 3];
+    end    
+    
+    %}
     imdTest = augmentedImageDatastore(imageSize,B);
     
-    pred = predict(model.trainImSeqNet,imdTest);
+    pred = predict(model.long.trainImSeqNet,imdTest);
+    %{
+    if num_rows<9
+        pred = predict(model.short.trainImshortSeqNet,imdTest);
+        %pred = predict(model.long.trainImSeqNet,imdTest);
+    else
+        pred = predict(model.long.trainImSeqNet,imdTest);
+    end
+    %}
+    
+    
+    
     listPred = cell2mat(pred);
-       
-    if listPred(1)>listPred(2)
-        if listPred(1)>0.8
+    
+    % intuitive
+    %
+     if listPred(1)>listPred(2)
+        score = listPred(1);
+        label = 0;
+            
+    else
+        score = listPred(2);
+        label = 1;
+    end
+    %}
+    
+    %{
+    if num_rows<9
+       listPred = cell2mat(pred);
+        if listPred(1)>listPred(2)
             score = listPred(1);
             label = 0;
         else
@@ -46,8 +78,14 @@ function [score, label] = get_sepsis_score(data, model)
             label = 1;
         end
     else
-        score = listPred(2);
-        label = 1;
+        listPred = cell2mat(pred);
+        if listPred(1)>listPred(2)
+            score = listPred(1);
+            label = 0;
+        else
+            score = listPred(2);
+            label = 1;
+        end
     end
     %}
 end
