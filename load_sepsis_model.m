@@ -1,5 +1,6 @@
 function model = load_sepsis_model()
-    model = load('chop3seqnet.mat');
-    %model = load('chop3resnet50.mat');
+    
+    model.long = load('chop6seqnet.mat');
+  
     
 end
